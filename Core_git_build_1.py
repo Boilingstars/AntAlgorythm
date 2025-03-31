@@ -63,7 +63,7 @@ class AntGen():
     # Смерть муравья подразумевает введение генетического алгоритма для контроля генерации!
     def _refresh_pheromons(self, matrix:np.matrix, points:int, length:float) -> np.matrix:
         # Обновляем матрицу феромонов. В данном случае значение value = points*0.6/lengths - пятый открытый параметр системы
-        impact_value = points + (1 / length) if length > 0 else 0
+        impact_value = points * 3 / length if length > 0 else 0
         matrix[matrix == 1] = impact_value
         
         return matrix
@@ -92,7 +92,7 @@ class AntGen():
         self.Pheromons += pheromon_trace
 
         if LogsInclude:
-            iteration_data, best_route_info = log.finalize_log(self.Pheromons)
+            iteration_data, best_route_info = log.finalize_log(self.Pheromons, self.ChoiceGradient)
 
         return iteration_data, filter([best_route_info] if best_route_info else [])
 
@@ -127,10 +127,12 @@ class Ant(AntGen):
             return idx
         
         paths_array = list(paths_array)
-        paths_array[idx - 1] = 100 # Точка, в которую нельзя повернуть становится недостижимой
+        paths_array[idx] = 100.0 # Точка, в которую нельзя повернуть становится недостижимой
         paths_array = np.array(paths_array)
 
-        return np.abs(paths_array - choice).argmin()
+        idx = np.abs(paths_array - choice).argmin()
+
+        return idx
 
     def _ant_making_choice(self, choice:float, current_point:int, previous_point:int) -> int:
         # Поиск наиболее близкого числа в массиве для выбора следующей точки
@@ -138,7 +140,7 @@ class Ant(AntGen):
         paths[previous_point - 1] = 0 # Исключаем возвращение обратно
         
         paths_array = np.array(paths)
-        paths_array[paths_array == 0] = 100 # Делаем нулевые точки недостижимыми
+        paths_array[paths_array == 0.0] = -100.0 # Делаем нулевые точки недостижимыми
         
         idx = (np.abs(paths_array - choice)).argmin() # Получаем индекс первого минимального элемента по модулю
         
@@ -148,11 +150,16 @@ class Ant(AntGen):
         chosen_point = int(idx) + 1 # idx + 1 т.к. итерация начинается с 0
 
         return chosen_point # Возвращаем предпочтительную точку перехода
-    
-    # -- ТУТ НУЖНА ОПТИМИЗАЦИЯ ДОСЮДА --
 
-    def _is_death_circle(self, route:list) -> bool: # Написать код выхода из кругов смерти
+    def _is_ant_dead(self, route:list, length:float, current_point:int) -> bool:
+        # Если попал в тупик или слишком долго 
         n = len(route)
+
+        if length >= self.gen.kill_border:
+            return (False, 'Превышен лимит длины')
+        
+        elif current_point == 0:
+            return (False, 'Тупик')
     
         # Проверяем последовательности длиной от 3 до n // 2
         for length in range(3, n // 2 + 1):
@@ -162,19 +169,9 @@ class Ant(AntGen):
                 # Проверяем, есть ли такая же последовательность дальше в массиве
                 for next_start in range(start + length, n - length + 1):
                     if route[next_start:next_start + length] == sequence:
-                        return True
+                        return (False, 'Круг смерти')
 
-        return False
-
-    def _is_ant_dead(self, length:float, current_point:int) -> bool:
-        # Выход из проблемных ситуаций (блуждание, тупик и круг смерти)
-        death = True
-
-        # Если попал в тупик или слишком долго блуждал
-        if length >= self.gen.kill_border or current_point == 0:
-            death = False
-
-        return death
+        return (True, None)
 
     def _ant_route(self) -> tuple:
         # Дорога одного муравья в итерации
@@ -207,25 +204,19 @@ class Ant(AntGen):
                 points += 1 # Сколько точек собрал муравей, на столько больше он отложит феромона
                 memory.append(current_point)
 
-            AntAlive = self._is_ant_dead(length, current_point) # Проверка того, был ли шаг муравья смертельным
+            AntAlive, death_reason = self._is_ant_dead(route, length, current_point) # Проверка того, был ли шаг муравья смертельным
 
             if len(memory) == len(self.gen.requried_points):
                 break
 
         # Если к концу цикла муравей умер, то параметры успеха обнуляются
-        if not AntAlive or self._is_death_circle(route) == True:
-            death_reason = "Превышен лимит длины" if length >= self.gen.kill_border else "Тупик"
-        
-        elif self._is_death_circle(route):
-            death_reason = "Круг смерти"
-
         if death_reason or not memory:
             return (ant_pheromon_trace, [], 0, 0, death_reason)
         
         return (ant_pheromon_trace, route, points, length, None) # Возвращаем коллекцию параметров успеха и маршрута
 
 if __name__ == "__main__":
-    Cycle = AntGen([4, 14, 10], [(4, 5)], 1, 0, a = 1, b = 1, p = 0.64, k = 38.0)
+    Cycle = AntGen([4, 14, 10], [(4, 5)], 1, 0, a = 2, b = 1, p = 0.64, k = 38.0)
     Route = Cycle.main()
 
     with open('logs.txt', 'w', encoding='utf-8') as file:  # Добавлено encoding

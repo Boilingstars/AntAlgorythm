@@ -57,12 +57,13 @@ class AntLog():
             
         self.ant_logs.append(f"\tНомер муравья {i + 1}: {self.status}")
     
-    def finalize_log(self, Pheromons):
+    def finalize_log(self, Pheromons, ChoiceGradient):
         
         avg_length = self.total_length / self.success_count if self.success_count else 0.0
 
         iteration_data = {
             "pheromones": Pheromons.copy(),
+            "choicegradient": ChoiceGradient.copy(),
             "dead": self.dead_count,
             "success": self.success_count,
             "avg_length": avg_length,
@@ -83,10 +84,16 @@ def write_gen_log(iteration_data, i):
         for row in iteration_data["pheromones"]
     ])
 
+    choice_gradien_str = "\n".join([
+        "\t\t" + "  ".join([f"{val:.2f}" for val in row])
+        for row in iteration_data["choicegradient"]
+    ])
+
     # Формируем запись лога для итерации
     log_entry = (
         f"Итерация {i + 1}:\n"
         f"Матрица феромонов:\n{pheromones_str}\n"
+        f"Матрица вероятностей:\n{choice_gradien_str}\n"
         f"Мёртвых муравьев: {iteration_data['dead']}\n"
         f"Дошло до цели: {iteration_data['success']}\n"
         f"Среднее расстояние: {iteration_data['avg_length']:.1f}\n"
