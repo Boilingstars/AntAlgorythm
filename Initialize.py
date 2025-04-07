@@ -3,12 +3,11 @@
 from libs import robositygame as rcg
 from libs import robocitydisp as rcd
 from Core_git_build_1 import AntGen
-from Utilities import generate_robot_commands
-from DB import R
+from Utilities import Robot
 
 # Начальные параметры
 
-start_angle:int = -270
+start_angle:int = 0
 
 start:int = 7
 
@@ -25,14 +24,15 @@ if __name__ == '__main__':
     Cycle = AntGen(flags = requried_points, blocks = blocks, s = start, angle = start_angle, a = 1, b = 1, p = 0.64, k = 38.0)
     Route = Cycle.main()
 
-    print(f'Оптимальный маршрут: {Route}')
-
     if Route:
         for points in Route.values():
             for point in points:
                 # ЗДЕСЬ КОД ДЛЯ МАШИНКИ
                 model.mov_to_point(point)
-            #print(generate_robot_commands(start_angle, R, points))
+            points.insert(0, start)
+            print(f'Оптимальный маршрут: {points}')
+            robot = Robot(start_angle, points)
+            robot.generate_robot_commands()
     else:
         print("Не удалось найти допустимый маршрут!")
 

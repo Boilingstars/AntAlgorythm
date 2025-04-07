@@ -7,3 +7,10 @@
 1 270 (15, 13) (2, 8, 10, 15) - 122.222% Все точки
 8 90 (15, 10) (2, 8, 10, 15)  - 146.429% Все точки
 1 0 (15, 13) (2, 8, 10, 15)   - 100%     Все точки
+
+import basic_control_module as bcm
+start_pos = 6
+start_rot = 180
+if __name__ == '__main__':
+  graph=bcm.Graph()
+  model=bcm.Rover(start_pos, start_rot, graph)

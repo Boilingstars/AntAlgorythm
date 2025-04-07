@@ -22,10 +22,10 @@ pygame.font.init()
 rsg_font = pygame.font.SysFont('Comic Sans MS', 20)
 window = pygame.display.set_mode((660, 740))
 clock = pygame.time.Clock()
-map = pygame.image.load("libs/new_city.png")
-bibika = pygame.image.load("libs/bibika.png")
-block = pygame.image.load("libs/blockade.png")
-flag = pygame.image.load("libs/flag_poll.png")
+map = pygame.image.load("AntAlgorythm/libs/new_city.png")
+bibika = pygame.image.load("AntAlgorythm/libs/bibika.png")
+block = pygame.image.load("AntAlgorythm/libs/blockade.png")
+flag = pygame.image.load("AntAlgorythm/libs/flag_poll.png")
 orig_bibika = bibika
 orig_block = block
 orig_flag = flag

@@ -1,35 +1,57 @@
 # Файл вспомогательных программ
 
 from numpy import array
+from DB import R
 
 N = 15
 
-def generate_robot_commands(start_angle, R, route):
-    commands = []
+class Robot():
+    def __init__(self, current_angle, route):
+        self.current_angle = current_angle
+        self.commands = []
+        self.route = route
     
-    current_angle = start_angle
-    
-    for i in range(len(route) - 1):
-        from_point = route[i]
-        to_point = route[i + 1]
-        
-        # Перемещение вперед
-        commands.append(f"model.go_forward({R[from_point - 1][to_point - 1]})")
-        
-        # Поворот
-        required_angle = R[from_point - 1][to_point - 1][1]
-        
-        if required_angle != current_angle:
-            if (current_angle - required_angle) % 360 == 90:
-                commands.append(f"model.rotate(90)")
-            elif (current_angle - required_angle) % 360 == 270:
-                commands.append(f"model.rotate(-90)")
-            else:
-                raise ValueError("Invalid rotation angle")
+    @staticmethod
+    def write_commands(self):
+        # Записываем команды в файл
+        with open('AntAlgorythm/final_input.txt', 'w') as f:
+            f.write('import basic_control_module as bcm\n')
+            f.write('start_pos = 6\n')
+            f.write('start_rot = 180\n')
+            f.write('if __name__ == \'__main__\':\n')
+            f.write('  graph=bcm.Graph()\n')
+            f.write('  model=bcm.Rover(start_pos, start_rot, graph)\n')
+            for command in self.commands:
+                f.write('  ' + command + '\n')
+
+    def generate_robot_commands(self): 
+        global R
+        for i in range(len(self.route) - 1):
+            from_point = self.route[i]
+            to_point = self.route[i + 1]
             
-            current_angle = required_angle
-    
-    return commands
+            # Получаем кортеж возможных углов поворота
+            possible_angles:tuple = R[from_point - 1][to_point - 1]
+            print(possible_angles, self.current_angle)
+            
+            # Проверяем, совпадает ли текущий угол с одним из возможных
+            if self.current_angle in possible_angles:
+                pass
+
+            # Проверяем необходимость поворота на 90
+            elif abs(self.current_angle - abs(possible_angles[0])) == 90:
+                self.commands.append(f"model.rotate(90)")
+                self.current_angle += 90
+            
+            # Проверяем необходимость поворота на -90 градусов
+            elif abs(self.current_angle - abs(possible_angles[1])) == 90:
+                self.commands.append(f"model.rotate(-90)")
+                self.current_angle -= 90
+
+            self.commands.append(f"model.go_forward()")
+
+        print(self.commands)
+        self.write_commands(self)
 
 def filter(routes):
     best_route = None
@@ -144,3 +166,7 @@ class AntLog():
         log_entry += "\n".join(iteration_data["ant_logs"]) + "\n"
 
         return log_entry
+    
+if __name__ == '__main__':
+    robot = Robot(0, [7, 6, 5, 4, 3, 2, 12, 13, 11, 12, 2, 1])
+    robot.generate_robot_commands()

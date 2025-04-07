@@ -176,7 +176,7 @@ class Ant(AntGen):
 
             length += float(self.gen.ActiveRoads[previous_point - 1, current_point - 1]) # Записываем пройденное расстояние
             ant_pheromon_trace[previous_point - 1, current_point - 1] = 1 # Запоминаем след муравья для рассчёта феромона.
-            route.append(current_point) # Запоминаем маршрут
+            route.append(int(current_point)) # Запоминаем маршрут
 
             # Учитываем только непройденные ранее точки в подсчете ценности маршрута
             if (current_point in self.gen.requried_points) and not(current_point in memory):
