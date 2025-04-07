@@ -2,22 +2,24 @@
 
 from libs import robositygame as rcg
 from libs import robocitydisp as rcd
-from Backup import AntGen
+from Core_git_build_1 import AntGen
+from Utilities import generate_robot_commands
+from DB import R
 
 # Начальные параметры
 
-start_angle:int = 0
+start_angle:int = -270
 
-start:int = 1
+start:int = 7
 
-requried_points:list = [4, 14, 10]
-blocks = [(4, 5)]
+requried_points:list = [1, 11, 3]
+blocks = [(9, 10)]
 
 if __name__ == '__main__':
 
     graph, model, com_flag = rcg.init_game(start, start_angle, blocks, requried_points)
     if not com_flag:
-        print("This track cannot be completed! Change base_info!")
+        print("Неправильные входные данные")
 
     # ЗДЕСЬ НАЧИНАЮТСЯ ВАШИ КОМАНДЫ/АЛГОРИТМ
     Cycle = AntGen(flags = requried_points, blocks = blocks, s = start, angle = start_angle, a = 1, b = 1, p = 0.64, k = 38.0)
@@ -28,7 +30,9 @@ if __name__ == '__main__':
     if Route:
         for points in Route.values():
             for point in points:
+                # ЗДЕСЬ КОД ДЛЯ МАШИНКИ
                 model.mov_to_point(point)
+            #print(generate_robot_commands(start_angle, R, points))
     else:
         print("Не удалось найти допустимый маршрут!")
 

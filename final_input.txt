@@ -1,0 +1,23 @@
+import basic_control_module as bcm
+start_pos = 6
+start_rot = 180
+if __name__ == '__main__':
+  graph=bcm.Graph()
+  model=bcm.Rover(start_pos, start_rot, graph)
+  model.go_forward()
+  model.go_forward()
+  model.go_forward()
+  model.rotate(-90)
+  model.go_forward()
+  model.rotate(-90)
+  model.go_forward()
+  model.rotate(90)
+  model.go_forward()
+  model.rotate(-90)
+  model.go_forward()
+  model.go_forward()
+  model.rotate(-90)
+  model.go_forward()
+  model.go_forward()
+  model.rotate(90)
+  model.go_forward()
